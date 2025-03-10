@@ -1,0 +1,19 @@
+{
+    "presets": [
+        "@babel/preset-env"
+    ],
+    "plugins": [
+        "babel-plugin-macros",
+        [
+            "module-resolver",
+            {
+                "alias": {
+                    "@models": "./src/models",
+                    "@services": "./src/services",
+                    "@controllers": "./src/controllers",
+                    "@middleware": "./src/middleware"
+                }
+            }
+        ]
+    ]
+}
