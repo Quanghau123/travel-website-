@@ -2,12 +2,15 @@ import express from "express";
 import dotenv from "dotenv";
 import initWebRoutes from "./routes/web.js";
 import connectDB from "./config/connectDB.js";
+import checkAllowedOrigin from "./middleware/checkAllowedOrigin.js"; 
 
 dotenv.config();
 
 const app = express();
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));  
+
+app.use(checkAllowedOrigin);
 
 initWebRoutes(app);
 
