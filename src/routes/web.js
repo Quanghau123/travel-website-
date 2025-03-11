@@ -5,6 +5,7 @@ import detailController from "@controllers/detailController.js";
 import testController from "@controllers/testController.js";
 import bookTourController from '@controllers/bookTourController.js';
 import paymentController from '@controllers/paymentController.js';
+import reviewController from '@controllers/reviewController.js';
 import auth from "../middleware/auth.js";
 
 const { authenticate, authorize } = auth;
@@ -32,6 +33,7 @@ let initWebRoutes = (app) => {
     router.put('/UpdateTour', tourController.handleUpdateTour);
     router.delete('/DeleteTour/:id', tourController.handleDeleteTour);
     router.get('/SearchTour', tourController.handleSearchTours);
+    router.get('/tours-paginated', tourController.handleGetAllToursPaginated);
 
     router.get('/GetAllDetails', detailController.handleGetAllDetails);
     router.get('/GetDetail/:id', detailController.handleGetDetailById);
@@ -52,6 +54,11 @@ let initWebRoutes = (app) => {
     router.delete('/DeletePayment/:id', paymentController.handleDeletePayment);
     router.post("/Payment/Momo", paymentController.handleProcessMomoPayment);
     router.post('/Payment/Callback', paymentController.handleMomoIPN);
+
+    router.get('/GetReviews/:tourId', reviewController.handleGetReviewsByTourId);
+    router.post('/CreateNewReview', reviewController.handleCreateReview);
+    router.put('/UpdateReview/:id', reviewController.handleUpdateReview);
+    router.delete('/DeleteReview/:id', reviewController.handleDeleteReview);
 
     return app.use("/", router);
 };

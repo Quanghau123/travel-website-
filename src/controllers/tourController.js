@@ -92,12 +92,28 @@ let handleSearchTours = async (req, res) => {
         let searchParams = req.body;
 
         let tours = await TourService.searchTours(searchParams);
-        
+
         return res.status(200).json({
             errCode: 0,
             errMessage: "OK",
             tours
         });
+    } catch (e) {
+        return res.status(500).json({
+            errCode: e.errCode || 2,
+            errMessage: e.errMessage || "An error occurred"
+        });
+    }
+};
+
+let handleGetAllToursPaginated = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        let result = await TourService.getAllToursPaginated(page, limit);
+
+        return res.status(200).json(result);
     } catch (e) {
         return res.status(500).json({
             errCode: e.errCode || 2,
@@ -113,4 +129,5 @@ export default {
     handleUpdateTour,
     handleDeleteTour,
     handleSearchTours,
+    handleGetAllToursPaginated,
 };

@@ -171,6 +171,32 @@ const searchTours = async (query) => {
     }
 };
 
+const getAllToursPaginated = async (page = 1, limit = 10) => {
+    try {
+        const skip = (page - 1) * limit;
+        const tours = await Tour.find().skip(skip).limit(limit);
+
+        const totalTours = await Tour.countDocuments();
+
+        return {
+            errCode: 0,
+            errMessage: 'OK',
+            tours,
+            pagination: {
+                total: totalTours,
+                page,
+                pages: Math.ceil(totalTours / limit),
+            },
+        };
+    } catch (e) {
+        throw {
+            errCode: 500,
+            errMessage: 'Internal server error',
+            error: e.message,
+        };
+    }
+};
+
 export default {
     getAllTours,
     getTourById,
@@ -178,4 +204,5 @@ export default {
     updateTourData,
     deleteTour,
     searchTours,
+    getAllToursPaginated,
 };

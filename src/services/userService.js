@@ -31,7 +31,11 @@ const handleUserLogin = async (email, password) => {
         }
 
         const token = jwt.sign(
-            { email: user.Email, role: user.Role },
+            {
+                _id: user._id,
+                name: user.UserName,
+                role: user.Role
+            },
             secretKey,
             { expiresIn: tokenExpiry }
         );
