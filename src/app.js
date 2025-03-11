@@ -2,15 +2,17 @@ import express from "express";
 import dotenv from "dotenv";
 import initWebRoutes from "./routes/web.js";
 import connectDB from "./config/connectDB.js";
-import checkAllowedOrigin from "./middleware/checkAllowedOrigin.js"; 
+import checkAllowedOrigin from "./middleware/checkAllowedOrigin.js";
+import checkBearerAuth from "./middleware/checkBearerAuth.js";
 
 dotenv.config();
 
 const app = express();
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));  
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(checkAllowedOrigin);
+//app.use(checkAllowedOrigin);
+app.use(checkBearerAuth);
 
 initWebRoutes(app);
 
