@@ -3,7 +3,7 @@ import ReviewService from '@services/reviewService.js';
 let handleGetReviewsByTourId = async (req, res) => {
     const tourId = req.params.tourId;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 6;
 
     try {
         const result = await ReviewService.getReviewsByTourId(tourId, page, limit);

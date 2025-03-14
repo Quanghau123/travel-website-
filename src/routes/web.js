@@ -59,6 +59,7 @@ let initWebRoutes = (app) => {
     router.post('/CreateNewReview', reviewController.handleCreateReview);
     router.put('/UpdateReview/:id', reviewController.handleUpdateReview);
     router.delete('/DeleteReview/:id', reviewController.handleDeleteReview);
+    router.get('/ReviewsPaginated/:tourId', reviewController.handleGetReviewsByTourId);
 
     return app.use("/", router);
 };
