@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+const cors = require('cors');
 import initWebRoutes from "./routes/web.js";
 import connectDB from "./config/connectDB.js";
 import checkAllowedOrigin from "./middleware/checkAllowedOrigin.js";
@@ -10,6 +11,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+//on CORS
+app.use(cors());
 
 //app.use(checkAllowedOrigin);
 //app.use(checkBearerAuth);
