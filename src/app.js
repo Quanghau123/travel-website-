@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //app.use(checkAllowedOrigin);
-app.use(checkBearerAuth);
+//app.use(checkBearerAuth);
 
 initWebRoutes(app);
 
