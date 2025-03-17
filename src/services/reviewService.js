@@ -2,7 +2,7 @@ import Review from '@models/reviewModel.js';
 import mongoose from 'mongoose';
 
 // Get all reviews (with optional pagination)
-const getAllReviews = async (page = 1, limit = 5) => {
+const getAllReviews = async (page = 1, limit = 6) => {
     try {
         const skip = (page - 1) * limit;
 
@@ -29,7 +29,7 @@ const getAllReviews = async (page = 1, limit = 5) => {
 };
 
 // Get all reviews for a tour (optional: pagination)
-const getReviewsByTourId = async (tourId, page = 1, limit = 5) => {
+const getReviewsByTourId = async (tourId, page = 1, limit = 6) => {
     try {
         const skip = (page - 1) * limit;
         const reviews = await Review.find({ TourId: tourId })
