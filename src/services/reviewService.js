@@ -1,6 +1,33 @@
 import Review from '@models/reviewModel.js';
 import mongoose from 'mongoose';
 
+// Get all reviews (with optional pagination)
+const getAllReviews = async (page = 1, limit = 5) => {
+    try {
+        const skip = (page - 1) * limit;
+
+        const reviews = await Review.find({})
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        const totalReviews = await Review.countDocuments();
+
+        return {
+            reviews,
+            currentPage: page,
+            totalPages: Math.ceil(totalReviews / limit),
+            totalReviews
+        };
+    } catch (error) {
+        throw {
+            errCode: 500,
+            errMessage: 'Internal server error',
+            error: error.message
+        };
+    }
+};
+
 // Get all reviews for a tour (optional: pagination)
 const getReviewsByTourId = async (tourId, page = 1, limit = 5) => {
     try {
@@ -104,6 +131,7 @@ const deleteReview = async (reviewId) => {
 };
 
 export default {
+    getAllReviews,
     getReviewsByTourId,
     createReview,
     updateReview,

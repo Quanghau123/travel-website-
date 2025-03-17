@@ -1,5 +1,25 @@
 import ReviewService from '@services/reviewService.js';
 
+let handleGetAllReviews = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+
+    try {
+        const result = await ReviewService.getAllReviews(page, limit);
+
+        return res.status(200).json({
+            errCode: 0,
+            errMessage: 'OK',
+            ...result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            errCode: error.errCode || 2,
+            errMessage: error.errMessage || 'An error occurred'
+        });
+    }
+};
+
 let handleGetReviewsByTourId = async (req, res) => {
     const tourId = req.params.tourId;
     const page = parseInt(req.query.page) || 1;
@@ -65,6 +85,7 @@ let handleDeleteReview = async (req, res) => {
 };
 
 export default {
+    handleGetAllReviews,
     handleGetReviewsByTourId,
     handleCreateReview,
     handleUpdateReview,

@@ -55,6 +55,7 @@ let initWebRoutes = (app) => {
     router.post("/Payment/Momo", paymentController.handleProcessMomoPayment);
     router.post('/Payment/Callback', paymentController.handleMomoIPN);
 
+    router.get('/GetAllReviews', reviewController.handleGetAllReviews);
     router.get('/GetReviews/:tourId', reviewController.handleGetReviewsByTourId);
     router.post('/CreateNewReview', reviewController.handleCreateReview);
     router.put('/UpdateReview/:id', reviewController.handleUpdateReview);
