@@ -9,9 +9,11 @@ const tourSchema = new mongoose.Schema({
   TourDifficulty: { type: String, enum: ['Easy', 'Medium', 'High'], default: 'Easy' },
   TourMinAge: { type: Number },
   DescribeTour: { type: String },
-}, { 
+  Rating: { type: Number, default: 0 },
+  Image: { type: String },
+}, {
   versionKey: false,
-  timestamps: true 
+  timestamps: true
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
