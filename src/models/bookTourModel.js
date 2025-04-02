@@ -6,6 +6,11 @@ const bookTourSchema = new mongoose.Schema({
         ref: 'Tour',
         required: true
     },
+    UserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     DepartureDate: {
         type: Date,
         min: new Date(),
