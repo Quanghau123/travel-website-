@@ -6,6 +6,11 @@ const bookTourSchema = new mongoose.Schema({
         ref: 'Tour',
         required: true
     },
+    DepartureDate: {
+        type: Date,
+        min: new Date(),
+        set: (val) => new Date(val),
+    },
     QuantityAdults: {
         type: Number,
         default: 0

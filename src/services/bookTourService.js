@@ -1,9 +1,9 @@
-import BookTour from "@models/bookTourModel";
 import mongoose from "mongoose";
+import BookTour from "@models/bookTourModel";
 
 const getAllBookTours = async () => {
     try {
-        const bookTours = await BookTour.find(); 
+        const bookTours = await BookTour.find();
         return { errCode: 0, data: bookTours };
     } catch (error) {
         return { errCode: 500, errMessage: "Database error", error: error.message };
@@ -17,7 +17,6 @@ const getBookTourById = async (bookTourId) => {
         }
 
         const bookTour = await BookTour.findById(bookTourId);
-
         if (!bookTour) {
             return { errCode: 1, errMessage: "BookTour not found" };
         }
@@ -30,14 +29,19 @@ const getBookTourById = async (bookTourId) => {
 
 const createNewBookTour = async (data) => {
     try {
-        const { TourId, QuantityAdults = 0, QuantityChildren = 0 } = data;
+        const { TourId, DepartureDate, QuantityAdults = 0, QuantityChildren = 0 } = data;
 
         if (!TourId || QuantityAdults < 0 || QuantityChildren < 0) {
             return { errCode: 1, errMessage: "Invalid input data" };
         }
 
+        if (DepartureDate && new Date(DepartureDate) < new Date()) {
+            return { errCode: 1, errMessage: "Departure date cannot be in the past" };
+        }
+
         const newBookTour = new BookTour({
             TourId,
+            DepartureDate: DepartureDate ? new Date(DepartureDate) : undefined,
             QuantityAdults,
             QuantityChildren
         });
@@ -52,16 +56,21 @@ const createNewBookTour = async (data) => {
 
 const updateBookTour = async (data) => {
     try {
-        const { BookTourId, TourId, QuantityAdults, QuantityChildren } = data;
+        const { BookTourId, TourId, DepartureDate, QuantityAdults, QuantityChildren } = data;
 
         if (!BookTourId || !mongoose.Types.ObjectId.isValid(BookTourId)) {
             return { errCode: 2, errMessage: "Missing or invalid BookTourId" };
+        }
+
+        if (DepartureDate && new Date(DepartureDate) < new Date()) {
+            return { errCode: 1, errMessage: "Departure date cannot be in the past" };
         }
 
         const updated = await BookTour.findByIdAndUpdate(
             BookTourId,
             {
                 TourId,
+                DepartureDate: DepartureDate ? new Date(DepartureDate) : undefined,
                 QuantityAdults,
                 QuantityChildren
             },
@@ -85,7 +94,6 @@ const deleteBookTour = async (bookTourId) => {
         }
 
         const deleted = await BookTour.findByIdAndDelete(bookTourId);
-
         if (!deleted) {
             return { errCode: 2, errMessage: "Book tour does not exist" };
         }
