@@ -29,9 +29,9 @@ const getBookTourById = async (bookTourId) => {
 
 const createNewBookTour = async (data) => {
     try {
-        const { TourId, DepartureDate, QuantityAdults = 0, QuantityChildren = 0 } = data;
+        const { TourId, UserId, DepartureDate, QuantityAdults = 0, QuantityChildren = 0 } = data;
 
-        if (!TourId || QuantityAdults < 0 || QuantityChildren < 0) {
+        if (!TourId || !UserId || QuantityAdults < 0 || QuantityChildren < 0) {
             return { errCode: 1, errMessage: "Invalid input data" };
         }
 
@@ -41,6 +41,7 @@ const createNewBookTour = async (data) => {
 
         const newBookTour = new BookTour({
             TourId,
+            UserId,
             DepartureDate: DepartureDate ? new Date(DepartureDate) : undefined,
             QuantityAdults,
             QuantityChildren
@@ -56,7 +57,7 @@ const createNewBookTour = async (data) => {
 
 const updateBookTour = async (data) => {
     try {
-        const { BookTourId, TourId, DepartureDate, QuantityAdults, QuantityChildren } = data;
+        const { BookTourId, TourId, UserId, DepartureDate, QuantityAdults, QuantityChildren } = data;
 
         if (!BookTourId || !mongoose.Types.ObjectId.isValid(BookTourId)) {
             return { errCode: 2, errMessage: "Missing or invalid BookTourId" };
@@ -70,6 +71,7 @@ const updateBookTour = async (data) => {
             BookTourId,
             {
                 TourId,
+                UserId,
                 DepartureDate: DepartureDate ? new Date(DepartureDate) : undefined,
                 QuantityAdults,
                 QuantityChildren
