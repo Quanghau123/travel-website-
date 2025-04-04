@@ -2,7 +2,13 @@ import Detail from "@models/detailModel.js";
 
 let getAllDetails = async () => {
     try {
-        let details = await Detail.find().exec();
+        let details = await Detail.find()
+            .populate({
+                path: "TourId",
+                select: "TourTime TourDifficulty TourMinAge Image"
+            })
+            .exec();
+
         return details;
     } catch (e) {
         throw { errCode: 500, errMessage: "Database error", error: e.message };
@@ -15,7 +21,12 @@ let getDetailById = async (detailId) => {
             throw { errCode: 1, errMessage: "Missing required parameter" };
         }
 
-        let detail = await Detail.findById(detailId).exec();
+        let detail = await Detail.findById(detailId)
+            .populate({
+                path: "TourId",
+                select: "TourTime TourDifficulty TourMinAge Image"
+            })
+            .exec();
 
         if (!detail) {
             throw { errCode: 1, errMessage: "Detail not found" };
