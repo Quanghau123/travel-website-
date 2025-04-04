@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const tourSchema = new mongoose.Schema({
   TourName: { type: String, required: true },
-  CategoryName: { type: String },
+  CategoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true }, 
   TourLocation: { type: String },
   TourTime: { type: Number },
   TourPrice: { type: Number, default: 0 },

@@ -10,10 +10,13 @@ dotenv.config();
 const getAllPayments = async () => {
     try {
         const payments = await Payment.find()
-            .populate('UserId')
+            .populate('UserId', 'UserName Phone Email')
             .populate({
                 path: 'BookTourId',
-                populate: { path: 'TourId' }
+                populate: {
+                    path: 'TourId',
+                    select: 'TourName'
+                }
             });
 
         return { errCode: 0, data: payments };
@@ -25,10 +28,13 @@ const getAllPayments = async () => {
 const getPaymentById = async (paymentId) => {
     try {
         const payment = await Payment.findById(paymentId)
-            .populate('UserId')
+            .populate('UserId', 'UserName Phone Email')
             .populate({
                 path: 'BookTourId',
-                populate: { path: 'TourId' }
+                populate: {
+                    path: 'TourId',
+                    select: 'TourName'
+                }
             });
 
         if (!payment) {
@@ -62,14 +68,17 @@ const createNewPayment = async (data) => {
             return { errCode: 3, errMessage: "Tour not found" };
         }
 
-        const amount = tour.TourPrice;
+        const adultPrice = tour.TourPrice;
+        const childPrice = adultPrice * 0.6;
+
+        const totalAmount = (bookTour.QuantityAdults * adultPrice) + (bookTour.QuantityChildren * childPrice);
 
         const newPayment = new Payment({
             BookTourId,
             UserId,
             PaymentMethod: PaymentMethod || "Unknown",
             TransactionId: `TXN_${Date.now()}`,
-            Amount: amount,
+            Amount: totalAmount,
             PaymentStatus
         });
 
@@ -143,7 +152,9 @@ const processMomoPayment = async (UserId, BookTourId) => {
             return { errCode: 3, errMessage: "Tour not found" };
         }
 
-        const amount = tour.TourPrice;
+        const adultPrice = tour.TourPrice;
+        const childPrice = adultPrice * 0.6;
+        const totalAmount = (bookTour.QuantityAdults * adultPrice) + (bookTour.QuantityChildren * childPrice); // Tổng số tiền
 
         const orderId = `ORDERID_${Date.now()}`;
         const requestId = `REQUESTID_${Date.now()}`;
@@ -158,7 +169,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
         const ipnUrl = process.env.MOMO_IPN_URL;
         const extraData = "";
 
-        const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
+        const rawSignature = `accessKey=${accessKey}&amount=${totalAmount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
         const signature = crypto.createHmac('sha256', secretKey)
             .update(rawSignature)
@@ -168,7 +179,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
             partnerCode,
             accessKey,
             requestId,
-            amount: amount.toString(),
+            amount: totalAmount.toString(),
             orderId,
             orderInfo,
             redirectUrl,
@@ -196,7 +207,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
             UserId,
             PaymentMethod: "Momo",
             TransactionId: orderId,
-            Amount: amount,
+            Amount: totalAmount,
             PaymentStatus: false
         });
 

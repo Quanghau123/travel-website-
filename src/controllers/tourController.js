@@ -2,12 +2,28 @@ import TourService from "@services/tourService.js";
 
 let handleGetAllTours = async (req, res) => {
     try {
-        let tours = await TourService.getAllTours();
-        return res.status(200).json({
-            errCode: 0,
-            errMessage: "OK",
-            tours
+        const page = parseInt(req.query.page) || null;
+        const limit = parseInt(req.query.limit) || null;
+
+        let result = await TourService.getAllTours(page, limit);
+        return res.status(200).json(result);
+    } catch (e) {
+        return res.status(500).json({
+            errCode: e.errCode || 2,
+            errMessage: e.errMessage || "An error occurred"
         });
+    }
+};
+
+let handleGetToursByCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await TourService.getAllToursByCategory(categoryId, page, limit);
+
+        return res.status(200).json(result);
     } catch (e) {
         return res.status(500).json({
             errCode: e.errCode || 2,
@@ -34,9 +50,10 @@ let handleGetTourById = async (req, res) => {
             tour
         });
     } catch (e) {
-        return res.status(404).json({
+        return res.status(e.errCode || 500).json({
             errCode: e.errCode || 1,
-            errMessage: e.errMessage || "Tour not found"
+            errMessage: e.errMessage || "Tour not found",
+            error: e.error || e.message
         });
     }
 };
@@ -46,9 +63,10 @@ let handleCreateNewTour = async (req, res) => {
         let message = await TourService.createNewTour(req.body);
         return res.status(200).json(message);
     } catch (e) {
-        return res.status(500).json({
-            errCode: 2,
-            errMessage: e.message || "An error occurred"
+        return res.status(e.errCode || 500).json({
+            errCode: e.errCode || 2,
+            errMessage: e.errMessage || "An error occurred",
+            error: e.error || e.message
         });
     }
 };
@@ -58,9 +76,10 @@ let handleUpdateTour = async (req, res) => {
         let message = await TourService.updateTourData(req.body);
         return res.status(200).json(message);
     } catch (e) {
-        return res.status(500).json({
+        return res.status(e.errCode || 500).json({
             errCode: e.errCode || 2,
-            errMessage: e.errMessage || "An error occurred"
+            errMessage: e.errMessage || "An error occurred",
+            error: e.error || e.message
         });
     }
 };
@@ -87,47 +106,22 @@ let handleDeleteTour = async (req, res) => {
     }
 };
 
-let handleSearchTours = async (req, res) => {
+const handleSearchTours = async (req, res) => {
     try {
-        let searchParams = req.body;
-
-        let tours = await TourService.searchTours(searchParams);
-
-        return res.status(200).json({
-            errCode: 0,
-            errMessage: "OK",
-            tours
-        });
-    } catch (e) {
-        return res.status(500).json({
-            errCode: e.errCode || 2,
-            errMessage: e.errMessage || "An error occurred"
-        });
-    }
-};
-
-let handleGetAllToursPaginated = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-
-        let result = await TourService.getAllToursPaginated(page, limit);
-
-        return res.status(200).json(result);
-    } catch (e) {
-        return res.status(500).json({
-            errCode: e.errCode || 2,
-            errMessage: e.errMessage || "An error occurred"
-        });
+        const result = await TourService.searchTours(req.query); 
+        res.json(result); 
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
 export default {
     handleGetAllTours,
+    handleGetToursByCategory,
     handleGetTourById,
     handleCreateNewTour,
     handleUpdateTour,
     handleDeleteTour,
     handleSearchTours,
-    handleGetAllToursPaginated,
 };

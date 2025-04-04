@@ -6,6 +6,7 @@ import testController from "@controllers/testController.js";
 import bookTourController from '@controllers/bookTourController.js';
 import paymentController from '@controllers/paymentController.js';
 import reviewController from '@controllers/reviewController.js';
+import categoryController from '@controllers/categoryController';
 import auth from "../middleware/auth.js";
 
 const { authenticate, authorize } = auth;
@@ -27,13 +28,19 @@ let initWebRoutes = (app) => {
     router.get("/ForgotPassword", userController.forgotPassword);
     router.post("/ResetPassword", userController.resetPassword);
 
+    router.post('/CreateCategory', categoryController.handleCreateCategory);
+    router.get('/GetCategories', categoryController.handleGetCategories);
+    router.get('/GetCategory/:id', categoryController.handleGetCategory);
+    router.put('/UpdateCategory/:categoryId', categoryController.handleUpdateCategory);
+    router.delete('/DeleteCategory/:categoryId', categoryController.handleDeleteCategory);
+
     router.get('/GetAllTours', tourController.handleGetAllTours);
+    router.get('/category/:categoryId/tours', tourController.handleGetToursByCategory);
     router.get('/GetTour/:id', tourController.handleGetTourById);
     router.post('/CreateNewTour', tourController.handleCreateNewTour);
     router.put('/UpdateTour', tourController.handleUpdateTour);
     router.delete('/DeleteTour/:id', tourController.handleDeleteTour);
     router.get('/SearchTour', tourController.handleSearchTours);
-    router.get('/tours-paginated', tourController.handleGetAllToursPaginated);
 
     router.get('/GetAllDetails', detailController.handleGetAllDetails);
     router.get('/GetDetail/:id', detailController.handleGetDetailById);
