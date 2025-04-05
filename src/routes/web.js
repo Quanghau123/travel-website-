@@ -44,6 +44,7 @@ let initWebRoutes = (app) => {
 
     router.get('/GetAllDetails', detailController.handleGetAllDetails);
     router.get('/GetDetail/:id', detailController.handleGetDetailById);
+    router.get('/GetDetailByTourId/:tourId', detailController.handleGetDetailByTourId);
     router.post('/CreateNewDetail', detailController.handleCreateNewDetail);
     router.put('/UpdateDetail', detailController.handleUpdateDetail);
     router.delete('/DeleteDetail/:id', detailController.handleDeleteDetail);

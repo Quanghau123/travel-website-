@@ -38,6 +38,29 @@ let getDetailById = async (detailId) => {
     }
 };
 
+let getDetailByTourId = async (tourId) => {
+    try {
+        if (!tourId) {
+            throw { errCode: 1, errMessage: "Missing required parameter: TourId" };
+        }
+
+        let details = await Detail.find({ TourId: tourId })
+            .populate({
+                path: "TourId",
+                select: "TourTime TourDifficulty TourMinAge Image"
+            })
+            .exec();
+
+        if (!details || details.length === 0) {
+            throw { errCode: 1, errMessage: "No details found for the specified TourId" };
+        }
+
+        return details;
+    } catch (e) {
+        throw { errCode: 500, errMessage: "Database error", error: e.message };
+    }
+};
+
 let createNewDetail = async (data) => {
     try {
         if (!data.TourId || !data.Des_Enjoy || !data.Des_Included) {
@@ -125,6 +148,7 @@ let deleteDetail = async (detailId) => {
 export default {
     getAllDetails,
     getDetailById,
+    getDetailByTourId,
     createNewDetail,
     updateDetail,
     deleteDetail

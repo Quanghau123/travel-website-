@@ -41,6 +41,31 @@ let handleGetDetailById = async (req, res) => {
     }
 };
 
+let handleGetDetailByTourId = async (req, res) => {
+    let tourId = req.params.tourId;
+
+    if (!tourId) {
+        return res.status(400).json({
+            errCode: 1,
+            errMessage: "Missing required parameter: TourId"
+        });
+    }
+
+    try {
+        let details = await detailService.getDetailByTourId(tourId);
+        return res.status(200).json({
+            errCode: 0,
+            errMessage: "OK",
+            details
+        });
+    } catch (error) {
+        return res.status(error.errCode || 500).json({
+            errCode: error.errCode || 500,
+            errMessage: error.errMessage || "No details found for the specified TourId"
+        });
+    }
+};
+
 let handleCreateNewDetail = async (req, res) => {
     try {
         let response = await detailService.createNewDetail(req.body);
@@ -84,6 +109,7 @@ let handleDeleteDetail = async (req, res) => {
 export default {
     handleGetAllDetails,
     handleGetDetailById,
+    handleGetDetailByTourId,
     handleCreateNewDetail,
     handleUpdateDetail,
     handleDeleteDetail
