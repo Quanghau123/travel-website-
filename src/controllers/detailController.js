@@ -52,16 +52,17 @@ let handleGetDetailByTourId = async (req, res) => {
     }
 
     try {
-        let details = await detailService.getDetailByTourId(tourId);
+        let detail = await detailService.getDetailByTourId(tourId);
+
         return res.status(200).json({
             errCode: 0,
             errMessage: "OK",
-            details
+            detail // <- Không còn là details (mảng) nữa
         });
     } catch (error) {
         return res.status(error.errCode || 500).json({
             errCode: error.errCode || 500,
-            errMessage: error.errMessage || "No details found for the specified TourId"
+            errMessage: error.errMessage || "No detail found for the specified TourId"
         });
     }
 };

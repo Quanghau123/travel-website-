@@ -44,18 +44,18 @@ let getDetailByTourId = async (tourId) => {
             throw { errCode: 1, errMessage: "Missing required parameter: TourId" };
         }
 
-        let details = await Detail.find({ TourId: tourId })
+        let detail = await Detail.findOne({ TourId: tourId }) // <- dùng findOne thay vì find
             .populate({
                 path: "TourId",
                 select: "TourTime TourDifficulty TourMinAge Image"
             })
             .exec();
 
-        if (!details || details.length === 0) {
-            throw { errCode: 1, errMessage: "No details found for the specified TourId" };
+        if (!detail) {
+            throw { errCode: 1, errMessage: "No detail found for the specified TourId" };
         }
 
-        return details;
+        return detail; // <- Trả về object
     } catch (e) {
         throw { errCode: 500, errMessage: "Database error", error: e.message };
     }
