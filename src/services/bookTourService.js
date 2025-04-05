@@ -27,6 +27,29 @@ const getBookTourById = async (bookTourId) => {
     }
 };
 
+let getBookTourByTourId = async (tourId) => {
+    try {
+        if (!tourId) {
+            throw { errCode: 1, errMessage: "Missing required parameter: TourId" };
+        }
+
+        let bookTour = await BookTour.findOne({ TourId: tourId }) // <- dùng findOne thay vì find
+            .populate({
+                path: "TourId",
+                select: "TourPrice"
+            })
+            .exec();
+
+        if (!bookTour) {
+            throw { errCode: 1, errMessage: "No bookTour found for the specified TourId" };
+        }
+
+        return bookTour; // <- Trả về object
+    } catch (e) {
+        throw { errCode: 500, errMessage: "Database error", error: e.message };
+    }
+};
+
 const createNewBookTour = async (data) => {
     try {
         const { TourId, UserId, DepartureDate, QuantityAdults = 0, QuantityChildren = 0 } = data;
@@ -114,6 +137,7 @@ const deleteBookTour = async (bookTourId) => {
 export default {
     getAllBookTours,
     getBookTourById,
+    getBookTourByTourId,
     createNewBookTour,
     updateBookTour,
     deleteBookTour
