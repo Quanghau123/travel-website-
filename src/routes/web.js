@@ -51,7 +51,6 @@ let initWebRoutes = (app) => {
 
     router.get('/GetAllBooktours', bookTourController.handleGetAllBookTours);
     router.get('/GetBooktour/:id', bookTourController.handleGetBookTourById);
-    router.get('/GetBookTourByTourId/:tourId', bookTourController.handleGetBookTourByTourId);
     router.post('/CreateNewBooktour', bookTourController.handleCreateNewBookTour);
     router.put('/UpdateBooktour', bookTourController.handleUpdateBookTour);
     router.delete('/DeleteBooktour/:id', bookTourController.handleDeleteBookTour);
