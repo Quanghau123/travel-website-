@@ -33,7 +33,7 @@ const getPaymentById = async (paymentId) => {
                 path: 'BookTourId',
                 populate: {
                     path: 'TourId',
-                    select: 'TourName'
+                    select: 'TourName' 
                 }
             });
 
@@ -68,17 +68,14 @@ const createNewPayment = async (data) => {
             return { errCode: 3, errMessage: "Tour not found" };
         }
 
-        const adultPrice = tour.TourPrice;
-        const childPrice = adultPrice * 0.6;
-
-        const totalAmount = (bookTour.QuantityAdults * adultPrice) + (bookTour.QuantityChildren * childPrice);
+        const amount = bookTour.TotalPrice;
 
         const newPayment = new Payment({
             BookTourId,
             UserId,
             PaymentMethod: PaymentMethod || "Unknown",
             TransactionId: `TXN_${Date.now()}`,
-            Amount: totalAmount,
+            Amount: amount,
             PaymentStatus
         });
 
@@ -92,23 +89,25 @@ const createNewPayment = async (data) => {
 
 const updatePayment = async (data) => {
     try {
-        if (!data.PaymentId) {
+        const { PaymentId, PaymentStatus, updateAmountFromTour } = data;
+
+        if (!PaymentId) {
             return { errCode: 2, errMessage: "Missing required parameter" };
         }
 
-        const payment = await Payment.findById(data.PaymentId);
+        const payment = await Payment.findById(PaymentId);
         if (!payment) {
             return { errCode: 1, errMessage: "Payment not found!" };
         }
 
-        if (data.PaymentStatus !== undefined) payment.PaymentStatus = data.PaymentStatus;
+        if (PaymentStatus !== undefined) payment.PaymentStatus = PaymentStatus;
 
-        if (data.updateAmountFromTour) {
+        if (updateAmountFromTour) {
             const bookTour = await BookTour.findById(payment.BookTourId);
             if (bookTour) {
                 const tour = await Tour.findById(bookTour.TourId);
                 if (tour) {
-                    payment.Amount = tour.TourPrice;
+                    payment.Amount = bookTour.TotalPrice;
                 }
             }
         }
@@ -152,9 +151,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
             return { errCode: 3, errMessage: "Tour not found" };
         }
 
-        const adultPrice = tour.TourPrice;
-        const childPrice = adultPrice * 0.6;
-        const totalAmount = (bookTour.QuantityAdults * adultPrice) + (bookTour.QuantityChildren * childPrice); // Tổng số tiền
+        const amount = bookTour.TotalPrice;
 
         const orderId = `ORDERID_${Date.now()}`;
         const requestId = `REQUESTID_${Date.now()}`;
@@ -169,7 +166,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
         const ipnUrl = process.env.MOMO_IPN_URL;
         const extraData = "";
 
-        const rawSignature = `accessKey=${accessKey}&amount=${totalAmount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
+        const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
         const signature = crypto.createHmac('sha256', secretKey)
             .update(rawSignature)
@@ -179,7 +176,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
             partnerCode,
             accessKey,
             requestId,
-            amount: totalAmount.toString(),
+            amount: amount.toString(),
             orderId,
             orderInfo,
             redirectUrl,
@@ -207,7 +204,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
             UserId,
             PaymentMethod: "Momo",
             TransactionId: orderId,
-            Amount: totalAmount,
+            Amount: amount,
             PaymentStatus: false
         });
 

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import BookTour from "@models/bookTourModel";
+import Tour from "@models/tourModel"
 
 const getAllBookTours = async () => {
     try {
@@ -31,26 +32,42 @@ const createNewBookTour = async (data) => {
     try {
         const { TourId, UserId, DepartureDate, QuantityAdults = 0, QuantityChildren = 0 } = data;
 
+        // Kiểm tra dữ liệu đầu vào
         if (!TourId || !UserId || QuantityAdults < 0 || QuantityChildren < 0) {
-            return { errCode: 400, errMessage: "Invalid input data" };  // Thay errCode = 1 thành 400
+            return { errCode: 400, errMessage: "Invalid input data" };
         }
 
         if (QuantityAdults + QuantityChildren === 0) {
-            return { errCode: 400, errMessage: "At least one person must be booked" };  // Thêm kiểm tra tổng số người
+            return { errCode: 400, errMessage: "At least one person must be booked" };
         }
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Loại bỏ giờ phút giây
+        today.setHours(0, 0, 0, 0);
         if (DepartureDate && new Date(DepartureDate).setHours(0, 0, 0, 0) < today) {
-            return { errCode: 400, errMessage: "Departure date cannot be in the past" };  // Thay errCode = 1 thành 400
+            return { errCode: 400, errMessage: "Departure date cannot be in the past" };
         }
 
+        // Lấy thông tin TourPrice từ bảng Tour
+        const tour = await Tour.findById(TourId);
+        if (!tour) {
+            return { errCode: 404, errMessage: "Tour not found" };
+        }
+
+        const { TourPrice } = tour;
+
+        // Tính toán số tiền cần thanh toán
+        const priceForAdults = TourPrice * QuantityAdults;
+        const priceForChildren = (TourPrice * 0.6) * QuantityChildren;
+        const totalPrice = priceForAdults + priceForChildren;
+
+        // Tạo đối tượng BookTour
         const newBookTour = new BookTour({
             TourId,
             UserId,
             DepartureDate: DepartureDate ? new Date(DepartureDate) : undefined,
             QuantityAdults,
-            QuantityChildren
+            QuantityChildren,
+            TotalPrice: totalPrice // Lưu tổng tiền thanh toán vào DB
         });
 
         await newBookTour.save();
@@ -66,14 +83,27 @@ const updateBookTour = async (data) => {
         const { BookTourId, TourId, UserId, DepartureDate, QuantityAdults, QuantityChildren } = data;
 
         if (!BookTourId || !mongoose.Types.ObjectId.isValid(BookTourId)) {
-            return { errCode: 400, errMessage: "Missing or invalid BookTourId" };  // Thay errCode = 2 thành 400
+            return { errCode: 400, errMessage: "Missing or invalid BookTourId" };
         }
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Loại bỏ giờ phút giây
+        today.setHours(0, 0, 0, 0);
         if (DepartureDate && new Date(DepartureDate).setHours(0, 0, 0, 0) < today) {
-            return { errCode: 400, errMessage: "Departure date cannot be in the past" };  // Thay errCode = 1 thành 400
+            return { errCode: 400, errMessage: "Departure date cannot be in the past" };
         }
+
+        // Lấy thông tin TourPrice từ bảng Tour
+        const tour = await Tour.findById(TourId);
+        if (!tour) {
+            return { errCode: 404, errMessage: "Tour not found" };
+        }
+
+        const { TourPrice } = tour;
+
+        // Tính toán lại số tiền cần thanh toán
+        const priceForAdults = TourPrice * QuantityAdults;
+        const priceForChildren = (TourPrice * 0.6) * QuantityChildren;
+        const totalPrice = priceForAdults + priceForChildren;
 
         const updatedData = {};
         if (TourId) updatedData.TourId = TourId;
@@ -81,11 +111,12 @@ const updateBookTour = async (data) => {
         if (DepartureDate) updatedData.DepartureDate = new Date(DepartureDate);
         if (QuantityAdults !== undefined) updatedData.QuantityAdults = QuantityAdults;
         if (QuantityChildren !== undefined) updatedData.QuantityChildren = QuantityChildren;
+        updatedData.TotalPrice = totalPrice; // Cập nhật tổng tiền vào DB
 
         const updated = await BookTour.findByIdAndUpdate(BookTourId, updatedData, { new: true });
 
         if (!updated) {
-            return { errCode: 404, errMessage: "Book tour not found!" };  // Thay errCode = 1 thành 404
+            return { errCode: 404, errMessage: "Book tour not found!" };
         }
 
         return { errCode: 0, message: "Book tour updated successfully!", data: updated };

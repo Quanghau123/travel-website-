@@ -23,6 +23,10 @@ const bookTourSchema = new mongoose.Schema({
     QuantityChildren: {
         type: Number,
         default: 0
+    },
+    TotalPrice: {
+        type: Number,
+        required: true,
     }
 }, {
     versionKey: false,
