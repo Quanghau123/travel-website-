@@ -33,7 +33,7 @@ const getPaymentById = async (paymentId) => {
                 path: 'BookTourId',
                 populate: {
                     path: 'TourId',
-                    select: 'TourName' 
+                    select: 'TourName'
                 }
             });
 
@@ -141,6 +141,7 @@ const processMomoPayment = async (UserId, BookTourId) => {
             return { errCode: 1, errMessage: "Missing parameters" };
         }
 
+        // Lấy thông tin bookTour và tour từ database
         const bookTour = await BookTour.findById(BookTourId);
         if (!bookTour) {
             return { errCode: 2, errMessage: "BookTour not found" };
@@ -152,7 +153,6 @@ const processMomoPayment = async (UserId, BookTourId) => {
         }
 
         const amount = bookTour.TotalPrice;
-
         const orderId = `ORDERID_${Date.now()}`;
         const requestId = `REQUESTID_${Date.now()}`;
 
@@ -164,14 +164,16 @@ const processMomoPayment = async (UserId, BookTourId) => {
         const orderInfo = `Thanh toán tour ${BookTourId}`;
         const redirectUrl = process.env.MOMO_REDIRECT_URL;
         const ipnUrl = process.env.MOMO_IPN_URL;
-        const extraData = "";
+        const extraData = "";  // Nếu có dữ liệu thêm thì thay đổi
 
+        // Tạo signature cho yêu cầu gửi tới Momo
         const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
         const signature = crypto.createHmac('sha256', secretKey)
             .update(rawSignature)
             .digest('hex');
 
+        // Cấu hình request gửi tới Momo
         const requestBody = {
             partnerCode,
             accessKey,
@@ -189,16 +191,19 @@ const processMomoPayment = async (UserId, BookTourId) => {
 
         console.log("Request gửi tới Momo:", requestBody);
 
+        // Gửi yêu cầu tới API của Momo
         const momoResponse = await axios.post(process.env.MOMO_API_URL, requestBody, {
             headers: {
                 'Content-Type': 'application/json'
             }
         });
 
+        // Kiểm tra phản hồi từ Momo
         if (!momoResponse.data || momoResponse.data.resultCode !== 0) {
             return { errCode: -2, errMessage: momoResponse.data.message || "Momo payment failed" };
         }
 
+        // Tạo một bản ghi thanh toán mới
         const newPayment = new Payment({
             BookTourId,
             UserId,
@@ -210,8 +215,16 @@ const processMomoPayment = async (UserId, BookTourId) => {
 
         await newPayment.save();
 
-        return { errCode: 0, data: momoResponse.data };
+        // Trả về đường dẫn thanh toán cho frontend
+        const payUrl = momoResponse.data.payUrl || momoResponse.data.url || "";  // Đảm bảo lấy đúng đường dẫn thanh toán
+
+        if (!payUrl) {
+            return { errCode: -3, errMessage: "Không có đường dẫn thanh toán Momo trả về." };
+        }
+
+        return { errCode: 0, payUrl: payUrl };  // Trả về URL thanh toán
     } catch (error) {
+        console.error("Lỗi trong quá trình xử lý thanh toán:", error);
         return { errCode: -1, errMessage: error.message };
     }
 };
