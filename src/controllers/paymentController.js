@@ -35,6 +35,60 @@ let handleGetPaymentById = async (req, res) => {
     }
 };
 
+let handleGetPaymentsByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({
+                errCode: 1,
+                errMessage: "Missing userId parameter"
+            });
+        }
+
+        const result = await paymentService.getPaymentsByUserId(userId);
+
+        if (result.errCode !== 0) {
+            return res.status(404).json(result);
+        }
+
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({
+            errCode: 500,
+            errMessage: "Server error",
+            error: error.message
+        });
+    }
+};
+
+let handleSearchPaymentsByUserInfo = async (req, res) => {
+    try {
+        const { keyword } = req.query;
+
+        if (!keyword) {
+            return res.status(400).json({
+                errCode: 1,
+                errMessage: "Missing keyword in query"
+            });
+        }
+
+        const result = await paymentService.searchPaymentsByUserInfo(keyword);
+
+        if (result.errCode !== 0) {
+            return res.status(404).json(result);
+        }
+
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({
+            errCode: 500,
+            errMessage: "Server error",
+            error: error.message
+        });
+    }
+};
+
 let handleCreateNewPayment = async (req, res) => {
     try {
         let response = await paymentService.createNewPayment(req.body);
@@ -123,6 +177,8 @@ let handleMomoIPN = async (req, res) => {
 export default {
     handleGetAllPayments,
     handleGetPaymentById,
+    handleGetPaymentsByUserId,
+    handleSearchPaymentsByUserInfo,
     handleCreateNewPayment,
     handleUpdatePayment,
     handleDeletePayment,

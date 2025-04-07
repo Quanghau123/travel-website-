@@ -1,6 +1,7 @@
 import Payment from "@models/paymentModel.js";
 import BookTour from "@models/bookTourModel.js";
 import Tour from "@models/tourModel.js";
+import User from "@models/userModel.js";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import axios from "axios";
@@ -42,6 +43,64 @@ const getPaymentById = async (paymentId) => {
         }
 
         return { errCode: 0, data: payment };
+    } catch (error) {
+        return { errCode: 500, errMessage: "Database error", error: error.message };
+    }
+};
+
+const getPaymentsByUserId = async (userId) => {
+    try {
+        const payments = await Payment.find({ UserId: userId })
+            .populate('UserId', 'UserName Phone Email')
+            .populate({
+                path: 'BookTourId',
+                populate: {
+                    path: 'TourId',
+                    select: 'TourName'
+                }
+            });
+
+        if (!payments || payments.length === 0) {
+            return { errCode: 1, errMessage: "No payments found for this user" };
+        }
+
+        return { errCode: 0, data: payments };
+    } catch (error) {
+        return { errCode: 500, errMessage: "Database error", error: error.message };
+    }
+};
+
+const searchPaymentsByUserInfo = async (keyword) => {
+    try {
+        const users = await User.find({
+            $or: [
+                { UserName: { $regex: keyword, $options: 'i' } },
+                { Phone: { $regex: keyword, $options: 'i' } },
+                { Email: { $regex: keyword, $options: 'i' } }
+            ]
+        });
+
+        if (!users || users.length === 0) {
+            return { errCode: 1, errMessage: "No users matched the keyword" };
+        }
+
+        const userIds = users.map(user => user._id);
+
+        const payments = await Payment.find({ UserId: { $in: userIds } })
+            .populate('UserId', 'UserName Phone Email')
+            .populate({
+                path: 'BookTourId',
+                populate: {
+                    path: 'TourId',
+                    select: 'TourName'
+                }
+            });
+
+        if (payments.length === 0) {
+            return { errCode: 2, errMessage: "No payments found for the matched users" };
+        }
+
+        return { errCode: 0, data: payments };
     } catch (error) {
         return { errCode: 500, errMessage: "Database error", error: error.message };
     }
@@ -257,6 +316,8 @@ const getPaymentByTransactionId = async (transactionId) => {
 export default {
     getAllPayments,
     getPaymentById,
+    getPaymentsByUserId,
+    searchPaymentsByUserInfo,
     createNewPayment,
     updatePayment,
     deletePayment,

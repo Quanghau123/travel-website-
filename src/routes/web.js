@@ -57,6 +57,8 @@ let initWebRoutes = (app) => {
 
     router.get('/GetAllPayments', paymentController.handleGetAllPayments);
     router.get('/GetPayment/:id', paymentController.handleGetPaymentById);
+    router.get('/GetPaymentsByUserId/:userId', paymentController.handleGetPaymentsByUserId);
+    router.get('/Search', paymentController.handleSearchPaymentsByUserInfo);
     router.post('/CreateNewPayment', paymentController.handleCreateNewPayment);
     router.put('/UpdatePayment', paymentController.handleUpdatePayment);
     router.delete('/DeletePayment/:id', paymentController.handleDeletePayment);
