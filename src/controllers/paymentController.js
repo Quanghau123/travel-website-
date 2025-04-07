@@ -110,7 +110,7 @@ let handleMomoIPN = async (req, res) => {
         }
 
         if (resultCode === 0) {
-            await paymentService.updatePayment({ PaymentId: payment.PaymentId, PaymentStatus: true });
+            await paymentService.updatePaymentStatusByTransactionId(orderId, true);
             return res.status(200).json({ errCode: 0, message: "Thanh toán thành công!" });
         } else {
             return res.status(400).json({ errCode: 3, errMessage: "Thanh toán thất bại" });
