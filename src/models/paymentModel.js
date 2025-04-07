@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const paymentSchema = new mongoose.Schema({
     BookTourId: {
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'BookTour',
         required: true
     },
@@ -17,6 +17,8 @@ const paymentSchema = new mongoose.Schema({
     },
     TransactionId: {
         type: String,
+        unique: true,
+        required: true
     },
     Amount: {
         type: Number,
