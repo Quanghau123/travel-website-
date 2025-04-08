@@ -1,7 +1,20 @@
 import Review from '@models/reviewModel.js';
+import Tour from '@models/tourModel.js';
 import mongoose from 'mongoose';
 
-// Get all reviews (with optional pagination)
+async function updateTourTotalRating(tourId) {
+    const reviews = await Review.find({ TourId: tourId });
+    if (reviews.length === 0) {
+        await Tour.findByIdAndUpdate(tourId, { TotalRating: 0 });
+        return;
+    }
+
+    const total = reviews.reduce((sum, r) => sum + r.Rating, 0);
+    const avg = total / reviews.length;
+
+    await Tour.findByIdAndUpdate(tourId, { TotalRating: avg });
+}
+
 const getAllReviews = async (page = 1, limit = 6) => {
     try {
         const skip = (page - 1) * limit;
@@ -28,7 +41,6 @@ const getAllReviews = async (page = 1, limit = 6) => {
     }
 };
 
-// Get all reviews for a tour (optional: pagination)
 const getReviewsByTourId = async (tourId, page = 1, limit = 6) => {
     try {
         const skip = (page - 1) * limit;
@@ -54,12 +66,12 @@ const getReviewsByTourId = async (tourId, page = 1, limit = 6) => {
     }
 };
 
-// Create review
 const createReview = async (data) => {
     try {
         const newReview = new Review(data);
         await newReview.save();
 
+        await updateTourTotalRating(newReview.TourId);
         return {
             errCode: 0,
             message: 'Review created successfully!',
@@ -74,7 +86,6 @@ const createReview = async (data) => {
     }
 };
 
-// Update review
 const updateReview = async (reviewId, data) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(reviewId)) {
@@ -90,6 +101,7 @@ const updateReview = async (reviewId, data) => {
             return { errCode: 404, errMessage: 'Review not found' };
         }
 
+        await updateTourTotalRating(updatedReview.TourId);
         return {
             errCode: 0,
             message: 'Review updated successfully!',
@@ -104,7 +116,6 @@ const updateReview = async (reviewId, data) => {
     }
 };
 
-// Delete review
 const deleteReview = async (reviewId) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(reviewId)) {
@@ -117,6 +128,7 @@ const deleteReview = async (reviewId) => {
             return { errCode: 404, errMessage: 'Review not found' };
         }
 
+        await updateTourTotalRating(deletedReview.TourId);
         return {
             errCode: 0,
             message: 'Review deleted successfully!'

@@ -3,24 +3,6 @@ import Tour from '@models/tourModel';
 import Review from '@models/reviewModel'; 
 import Category from '@models/categoryModel';
 
-const updateTourRating = async (tourId) => {
-    try {
-        const reviews = await Review.find({ TourId: tourId });
-
-        if (reviews.length === 0) {
-            await Tour.findByIdAndUpdate(tourId, { Rating: 0 });
-            return;
-        }
-
-        const totalRating = reviews.reduce((acc, review) => acc + review.Rating, 0);
-        const averageRating = totalRating / reviews.length;
-
-        await Tour.findByIdAndUpdate(tourId, { Rating: averageRating });
-    } catch (error) {
-        console.error("Error updating tour rating:", error);
-    }
-};
-
 const getAllTours = async (page, limit) => {
     try {
         if (page && limit) {
@@ -116,8 +98,6 @@ const createNewTour = async (data) => {
         const newTour = new Tour(data);
         await newTour.save();
 
-        await updateTourRating(newTour._id);
-
         return {
             errCode: 0,
             message: 'Tour created successfully!',
@@ -150,8 +130,6 @@ const updateTourData = async (data) => {
             return { errCode: 404, errMessage: 'Tour not found' };
         }
 
-        await updateTourRating(updatedTour._id);
-
         return {
             errCode: 0,
             message: 'Tour updated successfully!',
@@ -173,8 +151,6 @@ const deleteTour = async (tourId) => {
         if (!deletedTour) {
             return { errCode: 404, errMessage: 'Tour does not exist' };
         }
-
-        await updateTourRating(tourId);
 
         return { errCode: 0, message: 'Tour deleted successfully!' };
     } catch (e) {
