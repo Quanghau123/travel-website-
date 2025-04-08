@@ -10,7 +10,7 @@ async function updateTourTotalRating(tourId) {
     }
 
     const total = reviews.reduce((sum, r) => sum + r.Rating, 0);
-    const avg = total / reviews.length;
+    const avg = Math.round((total / reviews.length) * 10) / 10;
 
     await Tour.findByIdAndUpdate(tourId, { TotalRating: avg });
 }
