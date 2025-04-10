@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import Tour from '@models/tourModel'; 
-import Review from '@models/reviewModel'; 
+import Tour from '@models/tourModel';
+import Review from '@models/reviewModel';
 import Category from '@models/categoryModel';
 
 const getAllTours = async (page, limit) => {
@@ -106,6 +106,20 @@ const createNewTour = async (data) => {
     } catch (e) {
         throw { errCode: e.errCode || 500, errMessage: e.errMessage || 'Internal server error', error: e.message };
     }
+};
+
+const getTourDifficultyOptions = () => {
+    const difficulties = ['Easy', 'Medium', 'High'];
+    const options = difficulties.map((diff, index) => ({
+        _id: index + 1,
+        DifficultyLabel: diff,
+    }));
+
+    return {
+        errCode: 0,
+        message: 'Fetched tour difficulty options',
+        options,
+    };
 };
 
 const updateTourData = async (data) => {
@@ -226,6 +240,7 @@ export default {
     getAllToursByCategory,
     getTourById,
     createNewTour,
+    getTourDifficultyOptions,
     updateTourData,
     deleteTour,
     searchTours,

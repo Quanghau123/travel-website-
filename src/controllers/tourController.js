@@ -71,6 +71,18 @@ let handleCreateNewTour = async (req, res) => {
     }
 };
 
+let handleGetTourDifficultyOptions = (req, res) => {
+    try {
+        const result = TourService.getTourDifficultyOptions();
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(500).json({
+            errCode: 500,
+            errMessage: 'Internal server error',
+        });
+    }
+};
+
 let handleUpdateTour = async (req, res) => {
     try {
         let message = await TourService.updateTourData(req.body);
@@ -108,8 +120,8 @@ let handleDeleteTour = async (req, res) => {
 
 const handleSearchTours = async (req, res) => {
     try {
-        const result = await TourService.searchTours(req.query); 
-        res.json(result); 
+        const result = await TourService.searchTours(req.query);
+        res.json(result);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -121,6 +133,7 @@ export default {
     handleGetToursByCategory,
     handleGetTourById,
     handleCreateNewTour,
+    handleGetTourDifficultyOptions,
     handleUpdateTour,
     handleDeleteTour,
     handleSearchTours,

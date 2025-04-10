@@ -38,6 +38,7 @@ let initWebRoutes = (app) => {
     router.get('/category/:categoryId/tours', tourController.handleGetToursByCategory);
     router.get('/GetTour/:id', tourController.handleGetTourById);
     router.post('/CreateNewTour', tourController.handleCreateNewTour);
+    router.get('/GetTourDifficulty', tourController.handleGetTourDifficultyOptions);
     router.put('/UpdateTour', tourController.handleUpdateTour);
     router.delete('/DeleteTour/:id', tourController.handleDeleteTour);
     router.get('/SearchTour', tourController.handleSearchTours);
