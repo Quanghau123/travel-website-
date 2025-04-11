@@ -46,8 +46,8 @@ const getAllToursByCategory = async (categoryId, page, limit) => {
             return { errCode: 404, errMessage: 'Category not found' };
         }
 
-        const tours = await Tour.find({ CategoryName: category.name }).skip(skip).limit(limit);
-        const totalTours = await Tour.countDocuments({ CategoryName: category.name });
+        const tours = await Tour.find({ CategoryId: categoryId }).skip(skip).limit(limit);
+        const totalTours = await Tour.countDocuments({ CategoryId: categoryId });
 
         return {
             errCode: 0,
